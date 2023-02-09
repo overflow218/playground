@@ -1,0 +1,14 @@
+{
+  "name": "xmpp-ejabberd-tutorial",
+  "version": "1.0.0",
+  "description": "// 아쉽게도 저 도커이미지가 amd로 밖에 없어서 m1 맥에선 안돌아감 // 도커로 우분투 받아서 거기서 돌려도 되긴한데 귀찮아서 방법만 봐두기   docker run --name ejabberd -p 5222:5222",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "simple-xmpp": "^2.3.1"
+  }
+}
