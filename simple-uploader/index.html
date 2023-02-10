@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>simple uploader</title>
+  </head>
+  <body>
+    <h1>My simple uploader</h1>
+
+    File: <input type="file" id="f" />
+    <button id="btnUpload">Read & Upload</button>
+    <div id="divOutput"></div>
+
+    <script>
+      const btnUpload = document.getElementById("btnUpload");
+      const divOutput = document.getElementById("divOutput");
+      const f = document.getElementById("f");
+
+      btnUpload.addEventListener("click", () => {
+        const fileReader = new FileReader();
+        const theFile = f.files[0];
+
+        // onload 이벤트는 디스크에 있던 파일을 메모리로 올리는게 끝났을때 뜨는 이벤트임.
+        // 이제 이걸 네트워크 통해서 전송할거야 먼저 fileReader에 이벤트 리스너를 달아주고
+        // 그 담에 아래에서 실제로 읽어드리는거 확인하삼
+        fileReader.onload = async (event) => {
+          const CHUNK_SIZE = 5000;
+          const chunkCount = event.target.result.byteLength / CHUNK_SIZE + 1;
+
+          console.log("Read successfully");
+          const fileName = Math.random() * 1000 + theFile.name;
+          for (let chunkId = 0; chunkId < chunkCount; chunkId++) {
+            const chunk = event.target.result.slice(chunkId * CHUNK_SIZE, (chunkId + 1) * CHUNK_SIZE);
+            // client 단에서 API 호출할때 아래처럼 fetch 쓰면 된다고함 편하넹
+            // const url = encodeURIComponent("http://localshost:8080/upload");
+            await fetch("http://localhost:8080/upload", {
+              method: "POST",
+              headers: {
+                "content-type": "application/octet-stream",
+                "content-length": chunk.length,
+                "file-name": encodeURIComponent(fileName),
+                // 위에 file-name처럼 unkown header를 넣으면 프록시 같은곳에서 drop될 수 있어서
+                // 좋은 방법은 아님.
+              },
+              body: chunk,
+            });
+
+            // 진행사항 갱신해주기
+            divOutput.textContent = Math.round((chunkId * 100) / chunkCount, 0) + "%";
+          }
+          console.log(event.target.result.byteLength);
+        };
+        fileReader.readAsArrayBuffer(theFile);
+      });
+    </script>
+  </body>
+</html>
